@@ -62,7 +62,8 @@ public class TestWar {
     @Test
     public void testPlayWarWithNonStandardDeckAndTwoPLayers() throws Exception {
 
-        // The Standard deck of cards has four suits and thirteen ranks.
+        // The Standard deck of cards has four suits and thirteen ranks. 
+        // For this test, a non-standard deck will be used.
         int numberOfSuits = 5;
         int numberOfRanks = 15;
 
