@@ -144,7 +144,9 @@ public class War {
                 }
             }
         }
-
+        
+        // TODO:  Make this work for players that run out of cards during a War.  
+        
         return cardsPlayed;
     }
 
@@ -156,6 +158,9 @@ public class War {
         for (int i = (cardsPlayed.size() - numberOfPlayers); i < cardsPlayed.size(); i++) {
             cardsFacingUp.add(cardsPlayed.get(i));
         }
+        
+        // TODO:  Make this work for players that run out of cards during a War.  
+        
         return cardsFacingUp;
     }
 
