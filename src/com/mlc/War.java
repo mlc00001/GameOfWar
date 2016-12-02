@@ -86,11 +86,9 @@ public class War {
 
         // If there is more than one player with cards, then play a Battle or War.
         if (numberOfPlayers > 1) {
-
-            LinkedList<Card> cardsFromPlayers = new LinkedList();
-
+            
             // Get the cards for this Battle or War.
-            cardsFromPlayers = getCardsFromPlayers(cardsPlayed);
+            LinkedList<Card> cardsFromPlayers = getCardsFromPlayers(cardsPlayed);
 
             if (atWar){
                 
