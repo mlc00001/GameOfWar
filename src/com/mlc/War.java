@@ -76,6 +76,8 @@ public class War {
 
     private void playBattleOrWar(LinkedList<Card> cardsPlayed, boolean atWar) {
 
+        boolean onlyOnePlayerLeft = false;
+
         // First, remove players who don't have any more cards from the game.  This is done here since, if there
         // is a War, a player can run out of cards before another Battle is started.
         if (aPlayerHasNoMoreCards) {
@@ -83,7 +85,7 @@ public class War {
         }
 
         // If there is more than one player with cards, then play a Battle or War.
-        if ((numberOfPlayers > 1)) {
+        if (numberOfPlayers > 1) {
 
             LinkedList<Card> cardsFromPlayers = new LinkedList();
 
@@ -91,33 +93,46 @@ public class War {
             cardsFromPlayers = getCardsFromPlayers(cardsPlayed);
 
             if (atWar){
+                
                 // If one of the players now has no more cards, then remove them from the game.
                 if (aPlayerHasNoMoreCards) {
                     removePlayersWithoutCardsFromTheGame();
                 }
 
-                // Get another card from each player still in the game.  These will be the cards used to determine
-                // who won the war.
-                cardsFromPlayers = getCardsFromPlayers(cardsPlayed);
-            }
-
-            // Determine who won the Battle or War and the rank of the highest card.
-            // First, set the winner to 0 and the highest rank to their card's rank. Then, loop through the rest
-            // of the face up cards.
-            int winner = 0;
-            int highestRank = cardsFromPlayers.get(0).getRank();
-            for (int i = 1; i < cardsFromPlayers.size(); i++) {
-                // Check if the card is an Ace (rank equals 0). Then, check if the card rank is greater than
-                // the current known highest rank.
-                if ((cardsFromPlayers.get(i).getRank() == 0) ||
-                        ((cardsFromPlayers.get(i).getRank() > highestRank) && (highestRank != 0))) {
-                    // If there is a new highest card, then update the winner and highest rank.
-                    highestRank = cardsFromPlayers.get(i).getRank();
-                    winner = i;
+                if (numberOfPlayers > 1) {
+                    // Get another card from each player still in the game.  These will be the cards used to determine
+                    // who won the war.
+                    cardsFromPlayers = getCardsFromPlayers(cardsPlayed);
+                }
+                else {
+                    // There is only one player left in the game.  They win.  The war is over.
+                    onlyOnePlayerLeft = true;
+                    atWar = false;
                 }
             }
 
-            atWar = isThereAWar(cardsFromPlayers, highestRank);
+            int winner = 0;
+            int highestRank = cardsFromPlayers.get(0).getRank();
+
+            if (!onlyOnePlayerLeft) {
+
+                // Determine who won the Battle or War and the rank of the highest card.
+                // First, set the winner to 0 and the highest rank to their card's rank. Then, loop through the rest
+                // of the face up cards.
+                for (int i = 1; i < cardsFromPlayers.size(); i++) {
+                    // Check if the card is an Ace (rank equals 0). Then, check if the card rank is greater than
+                    // the current known highest rank.
+                    if ((cardsFromPlayers.get(i).getRank() == 0) ||
+                            ((cardsFromPlayers.get(i).getRank() > highestRank) && (highestRank != 0))) {
+                        // If there is a new highest card, then update the winner and highest rank.
+                        highestRank = cardsFromPlayers.get(i).getRank();
+                        winner = i;
+                    }
+                }
+
+                atWar = isThereAWar(cardsFromPlayers, highestRank);
+            }
+
             if (!atWar) {
                 // Give all the played cards to the winner of the Battle or War.  But, first shuffle them to avoid
                 // the game running indefinitely.
@@ -158,12 +173,11 @@ public class War {
         return cardsFromPlayers;
     }
 
-
-    private boolean isThereAWar(LinkedList<Card> cardsFacingUp, int highestRank){
+    private boolean isThereAWar(LinkedList<Card> cardsFromPlayers, int highestRank){
         // If more than one card in the last played cards has the same highest rank, then there is a war.
         int numberOfTimesHighestRankInPlayedCards = 0;
-        for (int i = (cardsFacingUp.size() - numberOfPlayers); i < cardsFacingUp.size(); i++) {
-            if ((cardsFacingUp.get(i).getRank() == highestRank)){
+        for (int i = (cardsFromPlayers.size() - numberOfPlayers); i < cardsFromPlayers.size(); i++) {
+            if ((cardsFromPlayers.get(i).getRank() == highestRank)){
                 numberOfTimesHighestRankInPlayedCards++;
             }
         }
