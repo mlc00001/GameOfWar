@@ -70,7 +70,7 @@ public class War {
         outputAllPlayerCards();
 
         // Some things to do to improve this method would be to add validation for the input parameters (numberOfSuits,
-        // numberOfRanks and numberOfPlayers.  Also, typically a Logger would be used for logging.  But, for this
+        // numberOfRanks and numberOfPlayers).  Also, typically a Logger would be used for logging.  But, for this
         // example, System.out.println will suffice.
     }
 
@@ -85,29 +85,39 @@ public class War {
         // If there is more than one player with cards, then play a Battle or War.
         if ((numberOfPlayers > 1)) {
 
-            // Get the cards for this Battle or War.
-            cardsPlayed = getCardsPlayed(cardsPlayed, atWar);
+            LinkedList<Card> cardsFromPlayers = new LinkedList();
 
-            // Get the cards that are facing up in the pile of played cards.
-            LinkedList<Card> cardsFacingUp = getCardsFacingUp(cardsPlayed);
+            // Get the cards for this Battle or War.
+            cardsFromPlayers = getCardsFromPlayers(cardsPlayed);
+
+            if (atWar){
+                // If one of the players now has no more cards, then remove them from the game.
+                if (aPlayerHasNoMoreCards) {
+                    removePlayersWithoutCardsFromTheGame();
+                }
+
+                // Get another card from each player still in the game.  These will be the cards used to determine
+                // who won the war.
+                cardsFromPlayers = getCardsFromPlayers(cardsPlayed);
+            }
 
             // Determine who won the Battle or War and the rank of the highest card.
             // First, set the winner to 0 and the highest rank to their card's rank. Then, loop through the rest
             // of the face up cards.
             int winner = 0;
-            int highestRank = cardsFacingUp.get(0).getRank();
-            for (int i = 1; i < cardsFacingUp.size(); i++) {
+            int highestRank = cardsFromPlayers.get(0).getRank();
+            for (int i = 1; i < cardsFromPlayers.size(); i++) {
                 // Check if the card is an Ace (rank equals 0). Then, check if the card rank is greater than
                 // the current known highest rank.
-                if ((cardsFacingUp.get(i).getRank() == 0) ||
-                        ((cardsFacingUp.get(i).getRank() > highestRank) && (highestRank != 0))) {
+                if ((cardsFromPlayers.get(i).getRank() == 0) ||
+                        ((cardsFromPlayers.get(i).getRank() > highestRank) && (highestRank != 0))) {
                     // If there is a new highest card, then update the winner and highest rank.
-                    highestRank = cardsFacingUp.get(i).getRank();
+                    highestRank = cardsFromPlayers.get(i).getRank();
                     winner = i;
                 }
             }
 
-            atWar = isThereAWar(cardsFacingUp, highestRank);
+            atWar = isThereAWar(cardsFromPlayers, highestRank);
             if (!atWar) {
                 // Give all the played cards to the winner of the Battle or War.  But, first shuffle them to avoid
                 // the game running indefinitely.
@@ -124,45 +134,30 @@ public class War {
         else if ((numberOfPlayers == 1)){
             // If there is only one player left, give them all the remaining played cards.
             for (int i = 0; i < cardsPlayed.size(); i++) {
-                    ((LinkedList<Card>) playerCards.get(0)).add(cardsPlayed.get(i));
+                ((LinkedList<Card>) playerCards.get(0)).add(cardsPlayed.get(i));
             }
         }
     }
 
-    private LinkedList<Card> getCardsPlayed(LinkedList<Card> cardsPlayed, boolean atWar) {
-        // Get the cards for this Battle or War.  If at war, then take two cards from each player.
-        // Otherwise, only take one.  Add them to the pile of cards already played.
-        int numberOfCardsToTake = atWar ? 2 : 1;
-        for (int i = 0; i < numberOfCardsToTake; i++) {
-            for (int j = 0; j < playerCards.size(); j++) {
-                if (!((LinkedList<Card>) playerCards.get(j)).isEmpty()) {
-                    cardsPlayed.add(((LinkedList<Card>) playerCards.get(j)).remove(0));
-                    if (((LinkedList<Card>) playerCards.get(j)).isEmpty()) {
-                        // The player has no more cards.  They are out of the game.
-                        aPlayerHasNoMoreCards = true;
-                    }
+    private LinkedList<Card> getCardsFromPlayers(LinkedList<Card> cardsPlayed) {
+        // Get the cards from the players.
+        LinkedList<Card> cardsFromPlayers = new LinkedList();
+        for (int i = 0; i < numberOfPlayers; i++) {
+            if (!((LinkedList<Card>) playerCards.get(i)).isEmpty()) {
+                cardsFromPlayers.add(((LinkedList<Card>) playerCards.get(i)).remove(0));
+                if (((LinkedList<Card>) playerCards.get(i)).isEmpty()) {
+                    // The player has no more cards.  They are out of the game.
+                    aPlayerHasNoMoreCards = true;
                 }
             }
         }
-        
-        // TODO:  Make this work for players that run out of cards during a War.  
-        
-        return cardsPlayed;
+
+        // Add the cards we just got from the players to the cards already in play.
+        cardsPlayed.addAll(cardsFromPlayers);
+
+        return cardsFromPlayers;
     }
 
-    private LinkedList<Card> getCardsFacingUp(LinkedList<Card> cardsPlayed) {
-        // To determine who won the Battle or War, only consider the last cards taken from each player.  These would
-        // be the cards that are "face up" on the table.  If there has been a war, then there could be quite a few
-        // cards in the "cards played" pile.
-        LinkedList<Card> cardsFacingUp = new LinkedList();
-        for (int i = (cardsPlayed.size() - numberOfPlayers); i < cardsPlayed.size(); i++) {
-            cardsFacingUp.add(cardsPlayed.get(i));
-        }
-        
-        // TODO:  Make this work for players that run out of cards during a War.  
-        
-        return cardsFacingUp;
-    }
 
     private boolean isThereAWar(LinkedList<Card> cardsFacingUp, int highestRank){
         // If more than one card in the last played cards has the same highest rank, then there is a war.
